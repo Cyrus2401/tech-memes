@@ -3,96 +3,110 @@
 @section('container')
 
   <section id="blog" class="blog">
-      {{-- <h6 data-aos="fade-up" class="mb-3">Devenez Admin si vous voulez publier des mếmes également !</h3> --}}
 
       @if($info = Session::get('info'))
-        <div class="alert alert-info">{{ $info }}</div>
+        <div class="container mb-4">
+          <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            <div>{{ $info }}</div>
+          </div>
+        </div>
       @endif
 
-      <div class="container" data-aos="fade-up">
+      @if(session()->has('success'))
+        <div class="container mb-4">
+          <div class="alert alert-success d-flex align-items-center">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div>{{ session()->get('success') }}</div>
+          </div>
+        </div>
+      @endif
 
-        <div class="row entries">
+      <div class="container">
 
-          @if(count($memes) > 0)
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="row entries">
 
-            @foreach ($memes as $meme)
+              @if(count($memes) > 0)
 
-              <article class="col-lg-12 entry">
+                @foreach ($memes as $meme)
 
-                @if($meme->title)
-                  <h2 class="entry-title">
-                    <a href="">{{ $meme->title }}</a>
-                  </h2>
-                @endif
+                  <article class="col-12 entry shadow-lg">
 
-                <div class="mb-3">
-                  <img src="/storage/{{ $meme->image }}" alt="" class="img-fluid">
-                </div>
+                    @if($meme->title)
+                      <h2 class="entry-title mb-3">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none">{{ $meme->title }}</a>
+                      </h2>
+                    @endif
 
-                <div class="d-flex justify-content-between flex-wrap entry-meta">
-                  <ul class="mt-2">
-                    <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Publié par {{ $meme->user->pseudo }}</a></li>
-                    <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">{{ $meme->created_at->format('d/m/Y') }}</time></a></li>
-                  </ul>
+                    <div class="entry-img-container mb-4 text-center">
+                      <img src="/storage/{{ $meme->image }}" alt="{{ $meme->title ?? 'Meme' }}" class="img-fluid">
+                    </div>
 
-                  <div>
-                    <button value="{{ $meme->id }}" class="btn btn-outline-primary showDeleteMemeModal">Télécharger<a href="/storage/{{ $meme->image }}" download=""></a></button>
-                  </div>
-                </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap entry-meta gap-3">
+                      <ul>
+                        <li><i class="bi bi-person-circle"></i> <span>Publié par <strong class="text-dark">{{ $meme->user->pseudo }}</strong></span></li>
+                        <li><i class="bi bi-clock"></i> <span><time>{{ $meme->created_at->format('d/m/Y') }}</time></span></li>
+                      </ul>
 
-                @auth
-                  @if(Auth::user()->role == "sadmin")
-
-                    <div class="d-flex justify-content-between flex-wrap">
                       <div>
-                        <a href="{{ route('updateMeme', $meme->id) }}"><button class="btn btn-outline-primary">Modifier</button></a>
-                        <button value="{{ $meme->id }}" class="btn btn-outline-danger showDeleteMemeModal">Supprimer</button>
+                        <a href="/storage/{{ $meme->image }}" download class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i> Télécharger</a>
                       </div>
                     </div>
-                    
-                  @endif
-                @endauth
 
-              </article>
+                    @auth
+                      @if(Auth::user()->role == "sadmin")
+                        <div class="d-flex mt-3 pt-3 border-top justify-content-end gap-2">
+                          <a href="{{ route('updateMeme', $meme->id) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i> Modifier</a>
+                          <button value="{{ $meme->id }}" class="btn btn-outline-danger btn-sm showDeleteMemeModal"><i class="bi bi-trash me-1"></i> Supprimer</button>
+                        </div>
+                      @endif
+                    @endauth
+
+                  </article>
+                  
+                @endforeach
+
+                <div class="d-flex justify-content-center mt-4">
+                  {!! $memes->withQueryString()->links('pagination::bootstrap-5') !!}
+                </div>
               
-            @endforeach
+              @else
+                <div class="text-center py-5 empty-state-container mx-auto" style="max-width: 680px;">
+                  <h3 class="empty-state-title text-dark">Le calme plat...</h3>
+                  <p class="text-muted empty-state-desc mx-auto mb-4" style="max-width: 480px;">
+                    Aucun mème n'a été posté pour le moment. Revenez plus tard ou devenez admin pour publier le tout premier !
+                  </p>
+                  @guest
+                    <a href="{{ route('becomeAdmin') }}" class="btn btn-primary"><i class="bi bi-shield-lock me-2"></i>Devenir Admin & Publier</a>
+                  @endguest
+                </div>
+              @endif
 
-          {{-- <div class="blog-pagination">
-            <ul class="justify-content-center">
-              <li><a href="#">1</a></li>
-              <li class="active"><a href="#">2</a></li>
-              <li><a href="#">3</a></li>
-            </ul>
-          </div> --}}
-
-          {!! $memes->withQueryString()->links('pagination::bootstrap-5') !!}
-          
-        @else
-
-          <div class="alert alert-info">Aucun mêmes n'a été posté !</div>
-          
-        @endif
+            </div>
+          </div>
+        </div>
 
       </div>
-
-    </div>
   </section>
 
   {{-- Modal de suppression du post --}}
   <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="deletePostModalLabel">DESACTIVATION DE L'ADMIN</h1>
+                <h1 class="modal-title fs-5" id="deletePostModalLabel"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Supprimer la publication</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            Voulez-vous vraiment supprimer ce poste ? 
+                Voulez-vous vraiment supprimer ce mème ? Cette action est irréversible.
             </div>
-            <form action="/deletePost/" id="disableUserForm" method="POST">
+            <form action="" id="disableUserForm" method="POST">
                 @csrf
                 <div class="modal-footer">
-                    <button type="submit" href="" class="btn btn-primary">Confirmer</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
                 </div>
             </form>
         </div>
@@ -103,14 +117,24 @@
 
 @section('script')
     <script>
-      $('.showDeleteMemeModal').on('click', function() {
+      $(document).ready(function() {
+        $('.showDeleteMemeModal').on('click', function() {
+          var val = $(this).val();
+          $('#disableUserForm').attr('action', '/deletePost/' + val);
+          $('#deletePostModal').modal('show');
+        });
 
-        var val = $(this).val()
-
-        $('#disableUserForm').attr('action', '/deletePost/'+val)
-        
-        $('#deletePostModal').modal('show');
-
-      })
+        // GSAP Stagger animations for meme cards on page load
+        if (typeof gsap !== 'undefined') {
+          gsap.from('.blog .entry', {
+            duration: 0.6,
+            opacity: 0,
+            y: 40,
+            stagger: 0.15,
+            ease: 'power3.out',
+            clearProps: 'all'
+          });
+        }
+      });
     </script>
 @endsection

@@ -30,8 +30,8 @@ class myController extends Controller
 
             'pseudo' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|string|min:5',
-            'confirm_password' => 'required|string|min:5',
+            'password' => 'required|string|min:6',
+            'confirm_password' => 'required|string|min:6',
 
         ], [
             'pseudo.required' => 'Ce champ est requis !',
@@ -42,11 +42,11 @@ class myController extends Controller
 
             'password.required' => 'Ce champ est requis !',
             'password.string' => 'Champ invalide !',
-            'password.min' => 'Entrer au moins 5 caractères !',
+            'password.min' => 'Entrer au moins 6 caractères !',
 
             'confirm_password.required' => 'Ce champ est requis !',
             'confirm_password.string' => 'Champ invalide !',
-            'confirm_password.min' => 'Entrer au moins 5 caractères !',
+            'confirm_password.min' => 'Entrer au moins 6 caractères !',
         ]);
 
         if($password != $confirm_password){
@@ -100,7 +100,8 @@ class myController extends Controller
             'password.string' => 'Champ invalide !',
         ]);
 
-        $isConnect = Auth::attempt(['pseudo' => $pseudo, 'password' => $password]);
+        $fieldType = filter_var($pseudo, FILTER_VALIDATE_EMAIL) ? 'email' : 'pseudo';
+        $isConnect = Auth::attempt([$fieldType => $pseudo, 'password' => $password]);
 
         if($isConnect){
 
