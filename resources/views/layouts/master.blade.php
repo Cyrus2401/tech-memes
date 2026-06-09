@@ -5,14 +5,14 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>J'aime l'informatique</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  <title>Tech Memes - Laugh with Code</title>
+  <meta content="Un espace pour partager et rire avec les mèmes informatiques" name="description">
+  <meta content="tech, memes, informatique, dev, rigolo, code, humour" name="keywords">
 
-  <link href="{{ asset('assets/img/loveComputer.png') }}" rel="icon">
-  <link href="{{ asset('assets/img/loveComputer.png') }}" rel="apple-touch-icon">
+  <link href="{{ asset('assets/img/logo.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/logo.png') }}" rel="apple-touch-icon">
 
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -36,7 +36,7 @@
 
 @yield('style')
 
-<body>
+<body class="@yield('body-class')">
 
   @include('_partials._header')
 
@@ -60,6 +60,10 @@
   <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
   <script src="{{ asset('assets/vendor/purecounter/purecounter.js') }}"></script>
   <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="{{ asset('assets/js/main.js') }}"></script>
