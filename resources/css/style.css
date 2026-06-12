@@ -389,6 +389,11 @@ section {
   object-fit: contain;
   background-color: transparent !important;
   border: none !important;
+  transition: transform 200ms ease-out;
+}
+
+.blog .entry .img-fluid:hover {
+  transform: scale(1.01);
 }
 
 .blog .entry .entry-meta {

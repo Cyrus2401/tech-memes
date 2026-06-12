@@ -2,7 +2,7 @@
 
 @section('container')
     <section id="contact" class="contact">
-        <div class="container" data-aos="fade-up">
+        <div class="container mt-connected">
 
         <div class="section-title">
             <h2 class="text-dark">PUBLIER UN MEME</h2>
@@ -10,7 +10,7 @@
 
         <div class="row">
 
-            <div class="col-lg-6 mx-auto">
+            <div class="col-lg-10 mx-auto">
                 <form method="post" role="form" class="php-email-form shadow-lg" enctype="multipart/form-data">
                     @csrf
 
@@ -30,18 +30,18 @@
 
                     <div class="form-group">
                         <label for="title" class="form-label">Titre du mème (optionnel)</label>
-                        <input type="text" class="form-control" name="title" id="title" placeholder="Ex: Quand le code marche du premier coup en prod..." value="{{ old('title') }}">
+                        <input type="text" class="form-control" name="title" id="title" value="{{ old('title') }}">
                     </div>
 
                     <div class="form-group">
-                        <label for="file" class="form-label">Image du mème (PNG, JPG, GIF)</label>
+                        <label for="file" class="form-label">Image du mème (PNG, JPG, JPEG, GIF)</label>
                         
                         <div class="custom-file-upload" id="upload-area">
                             <i class="bi bi-cloud-arrow-up text-primary display-4 mb-2 d-block"></i>
                             <span class="text-dark d-block mb-1">Glissez-déposez ou cliquez pour choisir un fichier</span>
                             <span class="text-muted small">Taille maximale : 2 Mo</span>
-                            <input type="file" accept=".png,.jpeg,.jpg,.gif" class="d-none" name="file" id="file" required>
                         </div>
+                        <input type="file" accept=".png,.jpeg,.jpg,.gif,.PNG,.JPEG,.JPG,.GIF,image/png,image/jpeg,image/gif" class="d-none" name="file" id="file">
                         
                         @error('file')
                             <div class="alert alert-danger mt-3 p-2 small">{{ $message }}</div>
@@ -76,6 +76,10 @@
                 $('#file').click();
             });
 
+            $('#file').on('click', function(e) {
+                e.stopPropagation();
+            });
+
             // Handle file selection and preview
             $('#file').on('change', function(e) {
                 var file = e.target.files[0];
@@ -85,21 +89,26 @@
                         $('#image-preview').attr('src', event.target.result);
                         $('#preview-container').removeClass('d-none');
                         // Custom styling changes for selected file
-                        $('#upload-area').addClass('border-success').find('span').first().text(file.name);
+                        $('#upload-area').removeClass('border-danger').addClass('border-success').find('span').first().text(file.name);
+                        $('#file-warning').remove();
                     };
                     reader.readAsDataURL(file);
                 }
             });
 
-            // Form entrance animation
-            if (typeof gsap !== 'undefined') {
-                gsap.from('.php-email-form', {
-                    duration: 0.6,
-                    opacity: 0,
-                    y: 30,
-                    ease: 'power3.out'
-                });
-            }
+            // Client-side validation on form submit
+            $('form').on('submit', function(e) {
+                var fileInput = $('#file');
+                if (fileInput.length && !fileInput[0].files.length) {
+                    e.preventDefault();
+                    $('#upload-area').addClass('border-danger');
+                    // Add a temporary warning message if not already present
+                    if (!$('#file-warning').length) {
+                        $('<div id="file-warning" class="text-danger small mt-2 ms-1"><i class="bi bi-exclamation-circle me-1"></i>Veuillez choisir un fichier image.</div>').insertAfter('#upload-area');
+                    }
+                }
+            });
+
         });
     </script>
 @endsection

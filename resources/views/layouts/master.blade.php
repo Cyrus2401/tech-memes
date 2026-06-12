@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>Tech Memes - Laugh with Code</title>
   <meta content="Un espace pour partager et rire avec les mèmes informatiques" name="description">
@@ -50,14 +51,11 @@
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-
   <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
   <script src="{{ asset('assets/vendor/purecounter/purecounter.js') }}"></script>
   <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
 
@@ -67,11 +65,9 @@
 
   <!-- Template Main JS File -->
   <script src="{{ asset('assets/js/main.js') }}"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>   
  
   <script type="module">
     $(document).ready(function(){
-      $.noConflict();
       $('#table').DataTable({
         language: {
           url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/fr-FR.json'
@@ -81,6 +77,48 @@
       });
     });
   </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.password-toggle-btn');
+        if (!btn) return;
+        e.preventDefault();
+        const input = btn.parentNode.querySelector('input');
+        const icon = btn.querySelector('i');
+        if (input && icon) {
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+          } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+          }
+        }
+      });
+    });
+  </script>
+
+  {{-- Modal de confirmation de déconnexion --}}
+  <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="logoutConfirmModalLabel"><i class="bi bi-box-arrow-right text-danger me-2"></i>Déconnexion</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Voulez-vous vraiment vous déconnecter ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="{{ route('logout') }}" class="btn btn-danger">Se déconnecter</a>
+            </div>
+        </div>
+    </div>
+  </div>
 
   @yield('script')
 

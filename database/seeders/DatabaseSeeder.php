@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         // Super Admin
         \App\Models\User::updateOrCreate(
-            ['pseudo' => 'sadmin'],
+            ['pseudo' => 'tech-memes'],
             [
                 'email' => 'cyrushessou@gmail.com',
                 'password' => 'admin@123',
@@ -25,9 +25,9 @@ class DatabaseSeeder extends Seeder
 
         // Standard Admins
         \App\Models\User::updateOrCreate(
-            ['pseudo' => 'alice'],
+            ['pseudo' => 'tech-memes-admin'],
             [
-                'email' => 'jdoe@techmemes.com',
+                'email' => 'admin@techmemes.com',
                 'password' => 'admin@123',
                 'role' => 'admin',
                 'statut' => 1
