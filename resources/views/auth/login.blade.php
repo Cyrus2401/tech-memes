@@ -5,78 +5,61 @@
 @section('container')
     <div class="auth-wrapper">
         <div class="auth-logo-container text-center mb-4">
-            <a href="{{ url('/') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+            <a href="{{ request()->url() }}" class="d-inline-flex align-items-center gap-2 text-decoration-none">
                 <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="auth-logo me-1">
                 <span class="logo-text fw-extrabold fs-2 text-dark" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.03em;">Tech<span style="color: var(--color-primary);">Memes</span></span>
             </a>
         </div>
 
-        <div class="auth-split-wrapper">
-            <!-- Left Side: Illustration (shapes removed per feedback) -->
-            <div class="auth-illustration-side">
-                <div class="auth-circle-bg">
-                    <!-- Crisp inline SVG matching the reference image's laptop design -->
-                    <svg width="180" height="180" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <ellipse cx="60" cy="85" rx="42" ry="4" fill="#cbd5e1" opacity="0.5"/>
-                        <rect x="25" y="30" width="70" height="48" rx="4" fill="#334155"/>
-                        <rect x="28" y="33" width="64" height="42" fill="#1e293b"/>
-                        <path d="M28 33 L65 33 L28 70 Z" fill="#ffffff" opacity="0.04"/>
-                        <path d="M18 78 C18 78 20 83 24 83 L96 83 C100 83 102 78 102 78 Z" fill="#94a3b8"/>
-                        <rect x="52" y="79" width="16" height="3" rx="1.5" fill="#cbd5e1"/>
-                        <circle cx="60" cy="48" r="7" stroke="#94a3b8" stroke-width="2" fill="none"/>
-                        <path d="M50 64 C50 58 54 56 60 56 C66 56 70 58 70 64" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round"/>
-                    </svg>
-                </div>
-            </div>
+        <div class="auth-card-container">
+            <div class="php-email-form">
+                <form method="post" role="form">
+                    @csrf
 
-            <!-- Right Side: Form -->
-            <div class="auth-form-side">
-                <div class="auth-split-form">
-                    <form method="post" role="form">
-                        @csrf
+                    <div class="text-center mb-4 pb-2">
+                        <h2 class="auth-title mb-0">Connexion</h2>
+                    </div>
 
-                        <div class="text-center mb-4 pb-2">
-                            <h2 class="auth-title mb-0">Connexion</h2>
+                    @if($error = session()->get('error'))
+                        <div class="alert alert-danger p-2 small mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $error }}
                         </div>
+                    @endif
 
-                        @if($error = session()->get('error'))
-                            <div class="alert alert-danger p-2 small mb-3">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $error }}
-                            </div>
-                        @endif
-
-                        @if($success = session()->get('success'))
-                            <div class="alert alert-success p-2 small mb-3">
-                                <i class="bi bi-check-circle-fill me-2"></i>{{ $success }}
-                            </div>
-                        @endif
-
-                        <div class="auth-input-wrapper">
-                            <input type="text" class="auth-control" name="pseudo" id="pseudo" placeholder="Email / Pseudo" value="{{ old('pseudo') }}" required autocomplete="username">
-                            <i class="bi bi-envelope auth-input-icon"></i>
+                    @if($success = session()->get('success'))
+                        <div class="alert alert-success p-2 small mb-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>{{ $success }}
                         </div>
-                        @error('pseudo')
-                            <div class="alert alert-danger mt-1 mb-3 p-2 small">{{ $message }}</div>
-                        @enderror
+                    @endif
 
-                        <div class="auth-input-wrapper">
-                            <input type="password" class="auth-control" name="password" id="password" placeholder="Mot de passe" required autocomplete="current-password">
-                            <i class="bi bi-lock auth-input-icon"></i>
-                        </div>
-                        @error('password')
-                            <div class="alert alert-danger mt-1 mb-3 p-2 small">{{ $message }}</div>
-                        @enderror
+                    <div class="auth-input-wrapper">
+                        <input type="text" class="auth-control" name="pseudo" id="pseudo" placeholder="Email / Pseudo" value="{{ old('pseudo') }}" required autocomplete="username">
+                        <i class="bi bi-envelope auth-input-icon"></i>
+                    </div>
+                    @error('pseudo')
+                        <div class="alert alert-danger mt-1 mb-3 p-2 small">{{ $message }}</div>
+                    @enderror
 
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-auth w-100">Se connecter</button>
-                            
-                            <div class="mt-4 pt-2">
-                                <a href="{{ route('becomeAdmin') }}" class="text-muted small text-decoration-none d-block mb-2">Devenir contributeur ?</a>
-                                <a href="{{ url('/') }}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-2"></i>Retour à l'accueil</a>
-                            </div>
+                    <div class="auth-input-wrapper">
+                        <input type="password" class="auth-control password-input" name="password" id="password" placeholder="Mot de passe" required autocomplete="current-password">
+                        <i class="bi bi-lock auth-input-icon"></i>
+                        <button type="button" class="password-toggle-btn" tabindex="-1">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    @error('password')
+                        <div class="alert alert-danger mt-1 mb-3 p-2 small">{{ $message }}</div>
+                    @enderror
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-auth w-100">Se connecter</button>
+                        
+                        <div class="mt-4 pt-2">
+                            <a href="{{ route('becomeAdmin') }}" class="text-muted small text-decoration-none d-block mb-2">Devenir contributeur ?</a>
+                            <a href="{{ request()->url() }}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-2"></i>Retour à l'accueil</a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -97,14 +80,13 @@
 @section('script')
     <script>
         $(document).ready(function() {
-            // Animate split layout entrance
+            // Animate card entrance
             if (typeof gsap !== 'undefined') {
-                gsap.from('.auth-split-wrapper', {
-                    duration: 0.7,
+                gsap.from('.auth-card-container', {
+                    duration: 0.4,
                     opacity: 0,
-                    scale: 0.97,
-                    y: 30,
-                    ease: 'power3.out'
+                    y: 20,
+                    ease: 'power2.out'
                 });
             }
         });

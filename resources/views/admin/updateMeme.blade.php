@@ -2,7 +2,7 @@
 
 @section('container')
     <section id="contact" class="contact">
-        <div class="container" data-aos="fade-up">
+        <div class="container mt-connected">
 
         <div class="section-title">
             <h2 class="text-dark">MODIFIER LE MEME</h2>
@@ -10,7 +10,7 @@
 
         <div class="row">
 
-            <div class="col-lg-6 mx-auto">
+            <div class="col-lg-10 mx-auto">
                 <form method="post" role="form" class="php-email-form shadow-lg" enctype="multipart/form-data">
                     @csrf
 
@@ -37,19 +37,19 @@
                     <div class="form-group mb-4" id="current-image-container">
                         <label class="form-label text-muted">Image actuelle du mème</label>
                         <div class="text-center p-2 rounded border bg-light">
-                            <img src="/storage/{{ $meme->image }}" class="img-fluid rounded" style="max-height: 240px; object-fit: contain;">
+                            <img src="{{ asset($meme->image) }}" class="img-fluid rounded" style="max-height: 240px; object-fit: contain;">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="file" class="form-label">Remplacer l'image (PNG, JPG, GIF)</label>
+                        <label for="file" class="form-label">Remplacer l'image (PNG, JPG, JPEG, GIF)</label>
                         
                         <div class="custom-file-upload" id="upload-area">
                             <i class="bi bi-cloud-arrow-up text-primary display-4 mb-2 d-block"></i>
                             <span class="text-dark d-block mb-1">Glissez-déposez ou cliquez pour remplacer l'image</span>
                             <span class="text-muted small">Sélectionnez une nouvelle image pour modifier</span>
-                            <input type="file" accept=".png,.jpeg,.jpg,.gif" class="d-none" name="file" id="file" required>
                         </div>
+                        <input type="file" accept=".png,.jpeg,.jpg,.gif,.PNG,.JPEG,.JPG,.GIF,image/png,image/jpeg,image/gif" class="d-none" name="file" id="file">
                         
                         @error('file')
                             <div class="alert alert-danger mt-3 p-2 small">{{ $message }}</div>
@@ -84,6 +84,10 @@
                 $('#file').click();
             });
 
+            $('#file').on('click', function(e) {
+                e.stopPropagation();
+            });
+
             // Handle file selection and preview
             $('#file').on('change', function(e) {
                 var file = e.target.files[0];
@@ -93,21 +97,26 @@
                         $('#image-preview').attr('src', event.target.result);
                         $('#preview-container').removeClass('d-none');
                         $('#current-image-container').addClass('opacity-50'); // Mute old image
-                        $('#upload-area').addClass('border-success').find('span').first().text(file.name);
+                        $('#upload-area').removeClass('border-danger').addClass('border-success').find('span').first().text(file.name);
+                        $('#file-warning').remove();
                     };
                     reader.readAsDataURL(file);
                 }
             });
 
-            // Form entrance animation
-            if (typeof gsap !== 'undefined') {
-                gsap.from('.php-email-form', {
-                    duration: 0.6,
-                    opacity: 0,
-                    y: 30,
-                    ease: 'power3.out'
-                });
-            }
+            // Client-side validation on form submit
+            $('form').on('submit', function(e) {
+                var fileInput = $('#file');
+                if (fileInput.length && !fileInput[0].files.length) {
+                    e.preventDefault();
+                    $('#upload-area').addClass('border-danger');
+                    // Add a temporary warning message if not already present
+                    if (!$('#file-warning').length) {
+                        $('<div id="file-warning" class="text-danger small mt-2 ms-1"><i class="bi bi-exclamation-circle me-1"></i>Veuillez choisir un fichier image.</div>').insertAfter('#upload-area');
+                    }
+                }
+            });
+
         });
     </script>
 @endsection

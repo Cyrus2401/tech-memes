@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Meme;
 use App\Models\User;
+use App\Models\Like;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class myController extends Controller
 {
@@ -118,19 +120,22 @@ class myController extends Controller
 
     public function adminHome(){
 
-        $memes = Meme::where('statut', 1)->orderBy('updated_at', 'desc')->where('statut', 1)->paginate(5);
+        $memes = Meme::where('statut', 1)->orderBy('updated_at', 'desc')->where('statut', 1)->paginate(10);
 
         return view('admin.home', ['memes' => $memes]);
 
     }
 
     public function admins(){
-       $admins = User::where('role', 'admin')->orderBy('created_at', 'desc')->get();
+       $admins = User::whereIn('role', ['admin', 'sadmin'])->orderBy('created_at', 'desc')->get();
 
        return view('admin.admins', ['admins' => $admins]);
     }
 
     public function disableAdmin($id){
+        if ($id == Auth::id()) {
+            return redirect()->route('admins')->with('error', "Vous ne pouvez pas désactiver votre propre compte.");
+        }
 
         $admin = User::find($id);
 
@@ -145,6 +150,9 @@ class myController extends Controller
     }
 
     public function ableAdmin($id){
+        if ($id == Auth::id()) {
+            return redirect()->route('admins')->with('error', "Vous ne pouvez pas activer votre propre compte.");
+        }
 
         $admin = User::find($id);
 
@@ -152,7 +160,7 @@ class myController extends Controller
             'statut' => "1"
         ]);
 
-        $success = "L'admin \"". $admin->pseudo  ." (". $admin->email . ")\" a été sactivé";
+        $success = "L'admin \"". $admin->pseudo  ." (". $admin->email . ")\" a été activé";
         
         return redirect()->route('admins')->with('success', $success);
 
@@ -160,7 +168,7 @@ class myController extends Controller
 
     public function myPost(){
 
-        $memes = Meme::where('user_id', Auth::user()->id)->orderBy('updated_at', 'desc')->where('statut', 1)->paginate(5);
+        $memes = Meme::where('user_id', Auth::user()->id)->orderBy('updated_at', 'desc')->where('statut', 1)->paginate(10);
 
         return view('admin.myPost', ['memes' => $memes]);
 
@@ -181,12 +189,18 @@ class myController extends Controller
             'file' => 'required|mimes:png,jpeg,jpg,gif|max:2048'
         ]);
 
-        $imagePath = $image->store('memes', 'public');
-
         $postMeme = Meme::create([
             'title' => $title,
-            'image' => $imagePath,
+            'image' => '',
             'user_id' => Auth::user()->id
+        ]);
+
+        $extension = $image->getClientOriginalExtension();
+        $fileName = $postMeme->id . '.' . $extension;
+        $image->move(public_path('memes'), $fileName);
+
+        $postMeme->update([
+            'image' => 'memes/' . $fileName
         ]);
 
         $success = "Meme posté avec succès !";
@@ -209,18 +223,23 @@ class myController extends Controller
             'file' => 'required|mimes:png,jpeg,jpg,gif|max:2048'
         ]);
 
-        $imagePath = $image->store('memes', 'public');
-
         $meme = Meme::find($id);
 
-        Storage::disk('public')->delete($meme->image);
+        if ($meme->image) {
+            $oldImagePath = public_path($meme->image);
+            if (file_exists($oldImagePath)) {
+                @unlink($oldImagePath);
+            }
+        }
+
+        $extension = $image->getClientOriginalExtension();
+        $fileName = $meme->id . '.' . $extension;
+        $image->move(public_path('memes'), $fileName);
 
         $meme->update([
-
             'title' => $title,
-            'image' => $imagePath,
+            'image' => 'memes/' . $fileName,
             'user_id' => Auth::user()->id
-
         ]);
  
         $success = "Modification éffectuée avec succès !";
@@ -240,6 +259,92 @@ class myController extends Controller
 
         return back()->with('success', $success);
 
+    }
+
+    public function profile(){
+        return view('admin.profile', ['user' => Auth::user()]);
+    }
+
+    public function updateProfile(Request $request){
+        $user = Auth::user();
+        
+        $validation = $request->validate([
+            'pseudo' => 'required|string|unique:users,pseudo,' . $user->id,
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ], [
+            'pseudo.required' => 'Ce champ est requis !',
+            'pseudo.string' => 'Pseudo invalide !',
+            'pseudo.unique' => 'Ce pseudo existe déjà !',
+            'email.required' => 'Ce champ est requis !',
+            'email.email' => 'Veuillez entrer une adresse email valide !',
+            'email.unique' => 'Cette adresse email est déjà utilisée !',
+        ]);
+
+        $user->update([
+            'pseudo' => $request->pseudo,
+            'email' => $request->email,
+        ]);
+
+        return back()->with('success_profile', 'Vos informations de profil ont été modifiées avec succès !');
+    }
+
+    public function updatePassword(Request $request){
+        $user = Auth::user();
+
+        $validation = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|different:current_password',
+            'confirm_password' => 'required|string|same:new_password',
+        ], [
+            'current_password.required' => 'Ce champ est requis !',
+            'new_password.required' => 'Ce champ est requis !',
+            'new_password.min' => 'Le nouveau mot de passe doit faire au moins 6 caractères !',
+            'new_password.different' => 'Le nouveau mot de passe doit être différent de l\'ancien !',
+            'confirm_password.required' => 'Ce champ est requis !',
+            'confirm_password.same' => 'La confirmation doit correspondre au nouveau mot de passe !',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Le mot de passe actuel est incorrect !']);
+        }
+
+        $user->update([
+            'password' => $request->new_password
+        ]);
+
+        return back()->with('success_password', 'Votre mot de passe a été modifié avec succès !');
+    }
+
+    public function toggleLike($id) {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'auth_required'], 401);
+        }
+
+        $user = Auth::user();
+        $meme = Meme::find($id);
+
+        if (!$meme) {
+            return response()->json(['error' => 'meme_not_found'], 404);
+        }
+
+        $like = Like::where('user_id', $user->id)->where('meme_id', $id)->first();
+
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            Like::create([
+                'user_id' => $user->id,
+                'meme_id' => $id
+            ]);
+            $liked = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'liked' => $liked,
+            'count' => $meme->likes()->count()
+        ]);
     }
 
 }

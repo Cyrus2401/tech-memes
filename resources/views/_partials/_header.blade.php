@@ -16,8 +16,6 @@
             @if(Auth::user()->role == "sadmin")
               <li><a class="nav-link @if(Route::is('admins')) active @endif" href="{{ route('admins') }}"><i class="bi bi-people me-2"></i>Admins</a></li>
             @endif
-            
-            <li><a class="nav-link text-danger" href="{{ route('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
           @endauth
 
           @guest
@@ -29,7 +27,16 @@
       </nav>
 
       @auth  
-        <a href="{{ route('becomeAdmin') }}" class="get-started-btn"><i class="bi bi-person-circle me-2"></i>{{ Auth::user()->pseudo }}</a>
+        <div class="dropdown">
+          <a href="#" class="get-started-btn dropdown-toggle d-flex align-items-center gap-1" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
+            <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->pseudo }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg" aria-labelledby="profileDropdown" style="background-color: #ffffff !important; border-radius: 8px;">
+            <li><a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="{{ route('profile') }}" style="font-size: 14px; color: #000000 !important;"><i class="bi bi-person text-primary"></i>Mon Profil</a></li>
+            <li><hr class="dropdown-divider bg-dark opacity-10"></li>
+            <li><a class="dropdown-item text-danger py-2 px-3 d-flex align-items-center gap-2" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal" style="font-size: 14px; color: #dc3545 !important;"><i class="bi bi-box-arrow-right"></i>Déconnexion</a></li>
+          </ul>
+        </div>
       @endauth
 
       @guest
